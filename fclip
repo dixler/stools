@@ -1,0 +1,5 @@
+#!/bin/bash
+while true; do 
+   xclip -sel c < $1; 
+   sleep 0.2; 
+done;

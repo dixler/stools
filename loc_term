@@ -1,2 +1,2 @@
 #!/bin/bash
-xfce4-terminal --working-directory="$(pwdx $(read TERM_PID < <(xdotool getactivewindow getwindowpid) && SH_PID=$(ps --ppid "$TERM_PID" -o pid=); echo "$SH_PID" | tac | awk '/./{i++}i==1') | awk '{print $2}')"
+xfce4-terminal --disable-server --working-directory="$(pwdx $(read TERM_PID < <(xdotool getactivewindow getwindowpid) && SH_PID=$(ps --ppid "$TERM_PID" -o pid=); echo "$SH_PID" | tac | awk '/./{i++}i==1') | awk '{print $2}')"

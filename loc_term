@@ -23,31 +23,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-child_process=$(read TERM_PID < <(xdotool getactivewindow getwindowpid) && ps --ppid "$TERM_PID" -o pid=); child_process=$(echo $child_process | tr -d ' ')
+child_process=$(read TERM_PID < <(xdotool getactivewindow getwindowpid) && ps --ppid "$TERM_PID" -o pid=); child_process=$(echo "$child_process" | tr -d ' ')
 child_path=$(readlink -e "/proc/$child_process/cwd")
-child_name=$(cat /proc/$child_process/status | grep "Name:" | awk '{ print $2 }')
-child_cmd=$(cat /proc/$child_process/cmdline | tr '\000' ' ')
+# child_name=$(< /proc/"$child_process"/status grep "Name:" | awk '{ print $2 }')
+# child_cmd=$(< /proc/"$child_process"/cmdline tr '\000' ' ')
 
 function find_ssh(){
-   if [ $1 = "" ]; then
+   if [ "$1" = "" ]; then
       ret=""
       return 1
    fi
-   proc_name=$(cat /proc/$1/status | grep '^Name:' | awk '{ print $2 }')
+   proc_name=$(< /proc/"$1"/status grep '^Name:' | awk '{ print $2 }')
    if [ "$proc_name" = "ssh" ]; then
       ret="$1"
       return 0
    fi
-   for child in `cat /proc/"$1"/task/"$1"/children`; do
-      find_ssh $child || return 0
+   for child in $(cat /proc/"$1"/task/"$1"/children); do
+      find_ssh "$child" || return 0
    done
 }
-find_ssh $child_process && echo $ret
+find_ssh "$child_process" && echo "$ret"
 
 baby_process="$ret"
-baby_path=$(readlink -e /proc/"$baby_process"/cwd)
-baby_name=$(cat /proc/$baby_process/status | grep "Name:" | awk '{ print $2 }')
-baby_cmd=$(cat /proc/$baby_process/cmdline | tr '\000' ' ')
+# baby_path=$(readlink -e /proc/"$baby_process"/cwd)
+baby_name=$(< /proc/"$baby_process"/status grep "Name:" | awk '{ print $2 }')
+baby_cmd=$(< /proc/"$baby_process"/cmdline tr '\000' ' ')
 
 if [ "$baby_name" = "ssh" ]; then
    xfce4-terminal --disable-server --working-directory="$child_path" --command="$SHELL -c \"$baby_cmd\""
